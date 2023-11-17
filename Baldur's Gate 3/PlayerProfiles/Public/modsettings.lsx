@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<save>
+  <version major="4" minor="0" revision="9" build="331" />
+  <region id="ModuleSettings">
+    <node id="root">
+      <children>
+        <node id="ModOrder">
+          <children>
+            <node id="Module">
+              <attribute id="UUID" value="28ac9ce2-2aba-8cda-b3b5-6e922f71b6b8" type="FixedString" />
+            </node>
+            <node id="Module">
+              <attribute id="UUID" value="f323b958-b845-4c79-b139-d39570658fbb" type="FixedString" />
+            </node>
+            <node id="Module">
+              <attribute id="UUID" value="362546ac-055c-4140-a4d0-ab3f15c0a91a" type="FixedString" />
+            </node>
+          </children>
+        </node>
+        <node id="Mods">
+          <children>
+            <node id="ModuleShortDesc">
+              <attribute id="Folder" value="GustavDev" type="LSString" />
+              <attribute id="MD5" value="5aa7e58cd6a43a22ba873c6478a63711" type="LSString" />
+              <attribute id="Name" value="GustavDev" type="LSString" />
+              <attribute id="UUID" value="28ac9ce2-2aba-8cda-b3b5-6e922f71b6b8" type="FixedString" />
+              <attribute id="Version64" value="144678782278324926" type="int64" />
+            </node>
+            <node id="ModuleShortDesc">
+              <attribute id="Folder" value="Animate Dead++" type="LSString" />
+              <attribute id="MD5" value="" type="LSString" />
+              <attribute id="Name" value="Animate Dead++" type="LSString" />
+              <attribute id="UUID" value="f323b958-b845-4c79-b139-d39570658fbb" type="FixedString" />
+              <attribute id="Version64" value="41236135627718656" type="int64" />
+            </node>
+            <node id="ModuleShortDesc">
+              <attribute id="Folder" value="PlayWithMe" type="LSString" />
+              <attribute id="MD5" value="" type="LSString" />
+              <attribute id="Name" value="Play With Me" type="LSString" />
+              <attribute id="UUID" value="362546ac-055c-4140-a4d0-ab3f15c0a91a" type="FixedString" />
+              <attribute id="Version64" value="36028797018963968" type="int64" />
+            </node>
+          </children>
+        </node>
+      </children>
+    </node>
+  </region>
+</save>
