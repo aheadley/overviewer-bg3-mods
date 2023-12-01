@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <save>
-    <version major="4" minor="3" revision="0" build="302"/>
+    <version major="4" minor="4" revision="0" build="300"/>
     <region id="Config">
         <node id="root">
             <children>
@@ -34,6 +34,27 @@
                             <attribute id="UUID" type="FixedString" value="77a2155f-4b35-4f0c-e7ff-4338f91426a4"/>
                             <attribute id="Version64" type="int64" value="36028797018963968"/>
                         </node>
+                        <node id="ModuleShortDesc">
+                            <attribute id="Folder" type="LSString" value="DiceSet_06"/>
+                            <attribute id="MD5" type="LSString" value=""/>
+                            <attribute id="Name" type="LSString" value="DiceSet_06"/>
+                            <attribute id="UUID" type="FixedString" value="ee4989eb-aab8-968f-8674-812ea2f4bfd7"/>
+                            <attribute id="Version64" type="int64" value="36028797018963968"/>
+                        </node>
+                        <node id="ModuleShortDesc">
+                            <attribute id="Folder" type="LSString" value="DiceSet_05"/>
+                            <attribute id="MD5" type="LSString" value=""/>
+                            <attribute id="Name" type="LSString" value="DiceSet_05"/>
+                            <attribute id="UUID" type="FixedString" value="6efc8f44-cc2a-0273-d4b1-681d3faa411b"/>
+                            <attribute id="Version64" type="int64" value="36028797018963968"/>
+                        </node>
+                        <node id="ModuleShortDesc">
+                            <attribute id="Folder" type="LSString" value="DiceSet_07"/>
+                            <attribute id="MD5" type="LSString" value=""/>
+                            <attribute id="Name" type="LSString" value="DiceSet_07"/>
+                            <attribute id="UUID" type="FixedString" value="bf19bab4-4908-ef39-9065-ced469c0f877"/>
+                            <attribute id="Version64" type="int64" value="36028797018963968"/>
+                        </node>
                     </children>
                 </node>
                 <node id="ModuleInfo">
@@ -42,7 +63,7 @@
                     <attribute id="Description" type="LSString" value=""/>
                     <attribute id="Folder" type="LSString" value="Gustav"/>
                     <attribute id="LobbyLevelName" type="FixedString" value="SYS_Menuscreen_Camp_A"/>
-                    <attribute id="MD5" type="LSString" value="160d4e3a277572952c372826b50b457e"/>
+                    <attribute id="MD5" type="LSString" value="102078f7d1436b5df54b552a03c810db"/>
                     <attribute id="MainMenuBackgroundVideo" type="FixedString" value=""/>
                     <attribute id="MenuLevelName" type="FixedString" value="SYS_Menuscreen_Act1_A"/>
                     <attribute id="Name" type="LSString" value="Gustav"/>

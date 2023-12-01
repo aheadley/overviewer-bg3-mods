@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <save>
-    <version major="4" minor="3" revision="0" build="302"/>
+    <version major="4" minor="4" revision="0" build="300"/>
     <region id="Config">
         <node id="root">
             <children>
@@ -11,7 +11,7 @@
                     <attribute id="Description" type="LSString" value=""/>
                     <attribute id="Folder" type="LSString" value="Shared"/>
                     <attribute id="LobbyLevelName" type="FixedString" value=""/>
-                    <attribute id="MD5" type="LSString" value="c8e172d6dff6ad1e34dd16bab976a232"/>
+                    <attribute id="MD5" type="LSString" value="c5404682e36a187578538a2ff0d7a089"/>
                     <attribute id="MainMenuBackgroundVideo" type="FixedString" value=""/>
                     <attribute id="MenuLevelName" type="FixedString" value=""/>
                     <attribute id="Name" type="LSString" value="Shared"/>

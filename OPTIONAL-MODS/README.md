@@ -4,7 +4,7 @@ These mods are not required for a co-op game to function, they only effect the l
 more likely to break on game updates.
 
   - NativeModLoader (1): https://www.nexusmods.com/baldursgate3/mods/944
-  - Native Camera Tweaks (2.2.3): https://www.nexusmods.com/baldursgate3/mods/945
+  - Native Camera Tweaks (2.3.0): https://www.nexusmods.com/baldursgate3/mods/945
 
 # Installation
 
