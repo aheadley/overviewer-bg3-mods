@@ -3,7 +3,7 @@
   - OWTravelersSong (1.1.0): https://github.com/aheadley/OWTravelersSong
   - ModFixer (1.1): https://www.nexusmods.com/baldursgate3/mods/141
   - PartyLimitBegone (legacy-1.7.0): https://www.nexusmods.com/baldursgate3/mods/327
-  - AnimateDead++ (1.37.27): https://www.nexusmods.com/baldursgate3/mods/642
+  - AnimateDead++ (1.37.30): https://www.nexusmods.com/baldursgate3/mods/642
   - PlayWithMe (1.0.1): https://www.nexusmods.com/baldursgate3/mods/2759
 
 # Installation
