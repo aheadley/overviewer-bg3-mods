@@ -28,7 +28,7 @@
                     <attribute id="Description" type="LSString" value=""/>
                     <attribute id="Folder" type="LSString" value="GustavDev"/>
                     <attribute id="LobbyLevelName" type="FixedString" value=""/>
-                    <attribute id="MD5" type="LSString" value="0d3811a755b96192b9aff8635128f4b5"/>
+                    <attribute id="MD5" type="LSString" value="e2e18b929c5fe078d051d1b069a8e2c5"/>
                     <attribute id="MainMenuBackgroundVideo" type="FixedString" value=""/>
                     <attribute id="MenuLevelName" type="FixedString" value="SYS_Menuscreen_Act3_B"/>
                     <attribute id="Name" type="LSString" value="GustavDev"/>
@@ -38,7 +38,7 @@
                     <attribute id="Tags" type="LSString" value=""/>
                     <attribute id="Type" type="FixedString" value="Adventure"/>
                     <attribute id="UUID" type="FixedString" value="28ac9ce2-2aba-8cda-b3b5-6e922f71b6b8"/>
-                    <attribute id="Version64" type="int64" value="144818875521682802"/>
+                    <attribute id="Version64" type="int64" value="144818875521766790"/>
                     <children>
                         <node id="PublishVersion">
                             <attribute id="Version64" type="int64" value="144255927711717104"/>
