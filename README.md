@@ -5,6 +5,7 @@
   - PartyLimitBegone (legacy-1.7.1): https://www.nexusmods.com/baldursgate3/mods/327
   - AnimateDead++ (1.37.30): https://www.nexusmods.com/baldursgate3/mods/642
   - PlayWithMe (1.0.1): https://www.nexusmods.com/baldursgate3/mods/2759
+  - EnhancedLeap AoE NoCombat (1.0.0): https://www.nexusmods.com/baldursgate3/mods/653
 
 # Installation
   - copy & paste the contents of `Data/` into `%steamapps%/common/Baldurs Gate 3/Data/`
