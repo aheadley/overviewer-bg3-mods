@@ -1,6 +1,6 @@
 # Mods
   - Tuna Custom Bard Songs
-  - OWTravelersSong (1.1.0): https://github.com/aheadley/OWTravelersSong
+  - OWTravelersSong (1.2.0): https://github.com/aheadley/OWTravelersSong
   - ModFixer (1.1): https://www.nexusmods.com/baldursgate3/mods/141
   - PartyLimitBegone (legacy-1.7.5): https://www.nexusmods.com/baldursgate3/mods/327
   - AnimateDead++ (1.37.31): https://www.nexusmods.com/baldursgate3/mods/642
