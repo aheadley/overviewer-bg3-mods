@@ -34,7 +34,7 @@
               <attribute id="MD5" value="" type="LSString" />
               <attribute id="Name" value="Animate Dead++" type="LSString" />
               <attribute id="UUID" value="f323b958-b845-4c79-b139-d39570658fbb" type="FixedString" />
-              <attribute id="Version64" value="41236150660104192" type="int64" />
+              <attribute id="Version64" value="41236152807587840" type="int64" />
             </node>
             <node id="ModuleShortDesc">
               <attribute id="Folder" value="ELeap_AoE" type="LSString" />
