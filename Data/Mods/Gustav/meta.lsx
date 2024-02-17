@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <save>
-    <version major="4" minor="4" revision="0" build="300"/>
+    <version major="4" minor="6" revision="0" build="1"/>
     <region id="Config">
         <node id="root">
             <children>
@@ -63,7 +63,7 @@
                     <attribute id="Description" type="LSString" value=""/>
                     <attribute id="Folder" type="LSString" value="Gustav"/>
                     <attribute id="LobbyLevelName" type="FixedString" value="SYS_Menuscreen_Camp_A"/>
-                    <attribute id="MD5" type="LSString" value="1cb107f7f5a4abd1d67c0299966ffdc1"/>
+                    <attribute id="MD5" type="LSString" value="306b354d187f472239f1110f8097f3c8"/>
                     <attribute id="MainMenuBackgroundVideo" type="FixedString" value=""/>
                     <attribute id="MenuLevelName" type="FixedString" value="SYS_Menuscreen_Act1_A"/>
                     <attribute id="Name" type="LSString" value="Gustav"/>
