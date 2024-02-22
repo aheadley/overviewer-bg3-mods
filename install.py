@@ -31,6 +31,7 @@ class Paths:
         try:
             return cls.platforms[sys.platform]()
         except KeyError:
+            print('WARNING: platform not supported, you must supply paths manually.', file=sys.stderr)
             return cls()
 
     def __init__(self):
@@ -130,7 +131,33 @@ class WindowsPaths(Paths):
 
     def discover_appdata(self):
         appdata = os.environ['LOCALAPPDATA']
-        return os.path.join(appdata, 'Larian Studios', 'Baldur\'s Gate 3')
+        trial = os.path.join(appdata, 'Larian Studios', 'Baldur\'s Gate 3')
+        if not os.path.isdir(trial):
+            raise RuntimeError('cannot find steam')
+        return trial
+
+@Paths.register_platform('linux')
+class LinuxPaths(Paths):
+    def discover_steam(self):
+        trial = os.path.join(os.path.expanduser('~'), '.local', 'share', 'Steam')
+        if not os.path.isdir(trial):
+            raise RuntimeError('cannot find steam')
+        return trial
+
+    def discover_appdata(self):
+        if not self.libraries:
+            self.libraries = self.discover_libraries()
+
+        wine_prefix = [
+            'compatdata', '1086940', 'pfx', 'drive_c',
+            'users', 'steamuser', 'AppData', 'Local',
+            'Larian Studios', 'Baldur\'s Gate 3',
+        ]
+        for library in self.libraries:
+            trial = os.path.join(library, 'steamapps', *wine_prefix)
+            if os.path.isdir(trial):
+                return trial
+        raise RuntimeError('cannot find appdata folder')
 
 class ParseError(Exception):
     def __init__(self, tracker, message):
@@ -481,6 +508,8 @@ if __name__ == '__main__':
                         help='path to the game folder')
     parser.add_argument('-a', '--appdata',
                         help='path to the game\'s appdata folder')
+    parser.add_argument('-s', '--steam',
+                        help='path to Steam\'s main install folder')
     parser.add_argument('-n', '--dry-run', action='store_true',
                         help='print the actions to take, then exit')
     parser.add_argument('-d', '--uninstall', action='store_true',
@@ -494,6 +523,8 @@ if __name__ == '__main__':
         paths.game = os.path.abspath(args.game)
     if args.appdata:
         paths.appdata = os.path.abspath(args.appdata)
+    if args.steam:
+        paths.steam = os.path.abspath(args.steam)
 
     os.chdir(os.path.abspath(os.path.split(sys.argv[0])[0]))
     main(paths, args.dry_run, args.uninstall, args.optional)
