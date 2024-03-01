@@ -2,16 +2,14 @@
 
 import argparse
 import ast
+import collections
+import filecmp
+import hashlib
 import json
 import os
 import os.path
 import shutil
 import sys
-
-METAFILE = 'overviewer-bg3-mods.meta'
-INSTALL = 'install'
-MOVE = 'move'
-MKDIR = 'mkdir'
 
 def die(*args):
     print('ERROR:', *args, file=sys.stderr)
@@ -260,169 +258,140 @@ def parse_vdf(stream, subvdf=False):
 
     return data
 
-class MetaInstaller:
-    def __init__(self, path, dry_run):
-        self.root = path
-        self.dry_run = dry_run
-        self.metapath = os.path.join(self.root, METAFILE)
-        self.meta = None
-        self.removed = []
-        self.added = []
+class LastUpdatedOrderedDict(collections.OrderedDict):
+    """OrderedDict but updating a value moves it to the end."""
+    def __setitem__(self, key, value):
+        super().__setitem__(key, value)
+        self.move_to_end(key)
 
-        print('In', self.root)
+class InstallSimulator:
+    """Gather file ops into a list of changes without performing them.
 
-    def uninstall(self):
-        if self.meta is not None:
-            raise RuntimeError('metafile must be closed to uninstall')
-        if not os.path.isfile(self.metapath):
-            return False
-        with open(self.metapath, 'rb+') as meta:
-            lines = []
-            offset = 0
-            for line in meta:
-                lines.append((offset, json.loads(line)))
-                offset += len(line)
+    Known bugs: paths are assumed to only ever be a file or a
+    directory. Removing a directory and replacing it with a file named
+    the same thing, or vice versa, will generate a change set that fails.
+    """
+    M_DIR = 'dir'
+    M_FILE = 'file'
 
-            lines.reverse()
-            for truncate_at, line in lines:
-                if line[0] == INSTALL:
-                    self.uninstall_file(line[1])
-                elif line[0] == MOVE:
-                    self.uninstall_move(line[1], line[2])
-                elif line[0] == MKDIR:
-                    self.uninstall_mkdir(line[1])
-                else:
-                    raise RuntimeError('unknown meta command {!r}'.format(line[0]))
-                if not self.dry_run:
-                    meta.truncate(truncate_at)
-                    meta.flush()
-        if lines:
-            assert lines[-1][0] == 0
-        if not self.dry_run:
-            os.remove(self.metapath)
-        return True
+    def __init__(self, path):
+        self.root = os.path.abspath(path)
+        self.changes = LastUpdatedOrderedDict()
 
-    def add_removed(self, path):
-        if self.dry_run:
-            self.removed.append(os.path.normpath(path))
+    def reset(self):
+        """Clear the list of changes."""
+        self.changes.clear()
 
-    def add_added(self, path):
-        if self.dry_run:
-            self.added.append(os.path.normpath(path))
-
-    def uninstall_file(self, dst):
-        fulldest = os.path.join(self.root, dst)
-        if self.isdir(dst):
-            die('should be file, not directory:', fulldest)
-        if self.isfile(dst):
-            print('\t', 'remove', dst)
-            if not self.dry_run:
-                os.remove(fulldest)
-            self.add_removed(dst)
-
-    def uninstall_move(self, src, dst):
-        fullsrc = os.path.join(self.root, src)
-        fulldest = os.path.join(self.root, dst)
-        if self.isdir(dst):
-            die('should be file, not directory:', fulldest)
-        if self.isfile(dst):
-            # dst is the backup, src is where it should go now
-            if self.isdir(src):
-                die('should be file, not directory:', fullsrc)
-            print('\t', 'move', dst, src)
-            if not self.dry_run:
-                shutil.copy2(fulldest, fullsrc)
-                os.remove(fulldest)
-            self.add_removed(dst)
-
-    def uninstall_mkdir(self, dst):
-        fulldest = os.path.join(self.root, dst)
-        if self.isfile(dst):
-            die('should be directory, not file:', fulldest)
-        if self.isdir(dst):
-            # only remove if empty
-            for leaf in os.listdir(fulldest):
-                if self.exists(os.path.join(dst, leaf)):
-                    break
-            else:
-                # no file within exists
-                print('\t', 'rmdir', dst)
-                if not self.dry_run:
-                    os.rmdir(fulldest)
-                self.add_removed(dst)
-        
-
-    def __enter__(self):
-        if self.meta is None:
-            if not self.dry_run:
-                self.meta = open(self.metapath, 'x')
-        return self
-
-    def __exit__(self, typ, value, traceback):
-        if self.meta is not None:
-            self.meta.close()
-        self.meta = None
-
-    def ensure_meta(self):
-        if self.meta is None and not self.dry_run:
-            raise RuntimeError('metafile must be open to install')
-
-    def emit_meta(self, *args):
-        print('\t', *args)
-        if not self.dry_run:
-            self.meta.write(json.dumps(list(args)) + '\n')
-            self.meta.flush()
+    def normpath(self, path):
+        """Turn a path into a normalized key."""
+        # turn absolute paths into relative paths, but
+        # relative paths stay relative to the root
+        relpath = os.path.relpath(os.path.join(self.root, path), self.root)
+        return os.path.normpath(relpath)
 
     def exists(self, path):
-        key = os.path.normpath(path)
-        if key in self.added:
+        """Check if a path exists, accounting for changes."""
+        key = self.normpath(path)
+        if key in self.changes:
+            if self.changes[key] is None:
+                return False
             return True
-        if key in self.removed:
-            return False
-        return os.path.exists(os.path.join(self.root, path))
+        return os.path.exists(os.path.join(self.root, key))
 
     def isdir(self, path):
-        key = os.path.normpath(path)
-        if key in self.added:
-            return True
-        if key in self.removed:
+        """Check if a path is a directory, accounting for changes."""
+        key = self.normpath(path)
+        if key in self.changes:
+            if self.changes[key] is None:
+                return False
+            elif self.changes[key][0] == self.M_DIR:
+                return True
             return False
-        return os.path.isdir(os.path.join(self.root, path))
+        return os.path.isdir(os.path.join(self.root, key))
 
     def isfile(self, path):
-        key = os.path.normpath(path)
-        if key in self.added:
-            return True
-        if key in self.removed:
+        """Check if a path is a file, accounting for changes."""
+        key = self.normpath(path)
+        if key in self.changes:
+            if self.changes[key] is None:
+                return False
+            elif self.changes[key][0] == self.M_FILE:
+                return True
             return False
-        return os.path.isfile(os.path.join(self.root, path))
+        return os.path.isfile(os.path.join(self.root, key))
 
-    def move_file(self, src, dst):
-        self.ensure_meta()
-        self.emit_meta(MOVE, src, dst)
-        fullsrc = os.path.join(self.root, src)
-        fulldest = os.path.join(self.root, dst)
-        if not self.isfile(src):
-            die('cannot move file:', fullsrc)
-        if self.exists(dst):
-            die('file already exists:', fulldest)
-        if not self.dry_run:
-            shutil.move(fullsrc, fulldest)
-        self.add_added(dst)
+    def listdir(self, path):
+        """List the contents of a directory, accounting for changes."""
+        key = self.normpath(path)
+        key_and_sep = key + os.path.sep
+        fullpath = os.path.join(self.root, key)
+        leaves = []
+
+        # first grab all the files on disk, but make sure they still exist
+        # after changes
+        if os.path.isdir(fullpath):
+            for leaf in os.listdir(fullpath):
+                if self.exists(os.path.join(key, leaf)):
+                    leaves.append(key)
+
+        # now grab any files added by changes
+        for k, v in self.changes.items():
+            if v is None:
+                continue
+            if k.startswith(key_and_sep):
+                kleaf = k[len(key_and_sep):]
+                if not os.path.sep in kleaf and kleaf not in leaves:
+                    leaves.append(kleaf)
+
+        return leaves
+
+    def same_file(self, src, dst, real_only=False):
+        """Return true if src and dest are the same file.
+
+        If real_only=True, ignore simulated changes and look only at
+        the real disk."""
+        a = src
+        b = os.path.join(self.root, dst)
+        if not real_only:
+            key = self.normpath(dst)
+            if key in self.changes:
+                if self.changes[key] is None:
+                    return False
+                elif self.changes[key][0] == self.M_FILE:
+                    b = self.changes[key][1]
+                else:
+                    return False
+        if not os.path.exists(b):
+            return False
+        return filecmp.cmp(a, b, shallow=False)
+
+    def open(self, path, mode='rb'):
+        """Open a file, accounting for changes."""
+        key = self.normpath(path)
+        fullpath = os.path.join(self.root, key)
+        if key in self.changes:
+            if self.changes[key] is None:
+                raise RuntimeError('path does not exist: {}'.format(fullpath))
+            elif self.changes[key][0] == self.M_FILE:
+                return open(self.changes[key][1], mode)
+            else:
+                raise RuntimeError('path is not a file: {}'.format(fullpath))
+        return open(os.path.join(self.root, path), mode)
 
     def makedir(self, dst):
-        self.ensure_meta()
+        """Simulate directory creation."""
         fulldest = os.path.join(self.root, dst)
+        key = self.normpath(dst)
         if self.isdir(dst):
             return
         if self.exists(dst):
-            die('path expected to be directory:', fulldest)
-        self.emit_meta(MKDIR, dst)
-        if not self.dry_run:
-            os.mkdir(fulldest)
-        self.add_added(dst)
+            raise RuntimeError('path expected to be a directory: {}'.format(fulldest))
+        self.changes[key] = [self.M_DIR]
+        if os.path.isdir(fulldest):
+            del self.changes[key]
 
     def makedirs(self, dst):
+        """Simulate recursive directory creation."""
         head, tail = os.path.split(dst)
         if not tail:
             head, tail = os.path.split(head)
@@ -430,61 +399,248 @@ class MetaInstaller:
             self.makedirs(head)
         self.makedir(dst)
 
+    def rmdir(self, dst):
+        """Simulate removing a directory. Fails if not empty."""
+        fulldest = os.path.join(self.root, dst)
+        key = self.normpath(dst)
+        if not self.exists(dst):
+            return
+        if not self.isdir(dst):
+            raise RuntimeError('path expected to be a directory: {}'.format(fulldest))
+        if self.listdir(dst):
+            raise RuntimeError('directory not empty: {}'.format(fulldest))
+        self.changes[key] = None
+        if not os.path.exists(fulldest):
+            del self.changes[key]
+
     def install_file(self, src, dst):
-        self.ensure_meta()
+        """Simulate installing src to dest."""
         head, tail = os.path.split(dst)
         if head:
             self.makedirs(head)
         fulldest = os.path.join(self.root, dst)
-        if self.exists(dst):
-            self.move_file(dst, dst + '.bak')
-        self.emit_meta(INSTALL, dst)
-        if not self.dry_run:
-            shutil.copy2(src, fulldest)
-        self.add_added(dst)
+        key = self.normpath(dst)
+        if self.isdir(dst):
+            raise RuntimeError('path is expected to be a file: {}'.format(fulldest))
+        if self.same_file(src, dst):
+            return
+        self.changes[key] = [self.M_FILE, os.path.abspath(src)]
+        if self.same_file(src, dst, real_only=True):
+            del self.changes[key]
+
+    def remove_file(self, dst):
+        """Simulate removing a file."""
+        fulldest = os.path.join(self.root, dst)
+        key = self.normpath(dst)
+        if not self.exists(dst):
+            return
+        if not self.isfile(dst):
+            raise RuntimeError('path expected to be a file: {}'.format(fulldest))
+        self.changes[key] = None
+        if not os.path.exists(fulldest):
+            del self.changes[key]
 
     def install_tree(self, src, dst):
+        """Simulate installing a bunch of files, recursively."""
         for subdir, dirs, files in os.walk(src):
-            for file in files:
-                subsrc = os.path.join(subdir, file)
+            for filename in files:
+                subsrc = os.path.join(subdir, filename)
                 leaf = os.path.relpath(subsrc, src)
                 subdst = os.path.join(dst, leaf)
                 self.install_file(subsrc, subdst)
 
-def do_install(paths, dry_run, uninstall, optional_mods):
-    if uninstall:
-        gameins = MetaInstaller(paths.game, dry_run)
-        uninstall_did_something = gameins.uninstall()
-        print()
-        appins = MetaInstaller(paths.appdata, dry_run)
-        uninstall_did_something = appins.uninstall() or uninstall_did_something
-        return uninstall_did_something
+class Installer:
+    """Keeps track of what files this tool remembers installing."""
+    M_VERSION = 0
+    M_HASH_DIR = 'dir' # the special hash for dirs
 
-    gameins = MetaInstaller(paths.game, dry_run)
-    uninstall_did_something = gameins.uninstall()
-    print()
-    with gameins:
-        gameins.install_tree('Data', 'Data')
-        if optional_mods:
-            gameins.install_tree('OPTIONAL-MODS/bin', 'bin')
+    # blacklisted files, you can overwrite them but deleting them is no-no
+    BLACKLIST = [
+        'bin/bink2w64.dll',
+        'bin/bink2w64_original.dll',
+    ]
 
-    print()
+    def __init__(self, root, metafile='overviewer-bg3-mods.meta'):
+        self.root = os.path.abspath(root)
+        self.sim = InstallSimulator(self.root)
+        self.metapath = os.path.join(self.root, metafile)
+        self.meta = {}
 
-    appins = MetaInstaller(paths.appdata, dry_run)
-    uninstall_did_something = appins.uninstall() or uninstall_did_something
-    print()
-    with appins:
-        appins.install_tree('Baldur\'s Gate 3', '')
+        # read the metadata, with some failure modes
+        if os.path.isfile(self.metapath):
+            with open(self.metapath, 'r') as f:
+                try:
+                    self.meta = json.load(f)
+                    assert 'version' in self.meta
+                    assert isinstance(self.meta.get('files'), dict)
+                except Exception:
+                    print('Could not load metafile!', file=sys.stderr)
+                    print('It could be corrupted, or you used an older version of', file=sys.stderr)
+                    print('this tool. If so, uninstall using the older tool first.', file=sys.stderr)
+                    die('Bad metafile.')
+        else:
+            self.meta = self.default_meta()
 
-    return uninstall_did_something
+        if self.meta['version'] != self.M_VERSION:
+            print('Bad metafile version!', file=sys.stderr)
+            print('You may have used a newer version of this tool on this game.', file=sys.stderr)
+            print('If so, you should go back to using it.', file=sys.stderr)
+            die('Bad metafile.')
+
+        # find all the files we both installed and which have the
+        # same hash we installed them with
+        # we'll treat these as "unmodified" and safe to uninstall
+        self.unmodified = {}
+        for k, v in self.meta['files'].items():
+            if v == self.M_HASH_DIR:
+                continue
+            path = os.path.join(self.root, k)
+            if os.path.isfile(path):
+                with open(path, 'rb') as f:
+                    if v == self.hash(f):
+                        self.unmodified[k] = v
+
+    def default_meta(self):
+        """The default, empty metadata."""
+        return {
+            'version': self.M_VERSION,
+            'files': {},
+        }
+
+    def hash(self, fobj):
+        """Hash a file object."""
+        bufsize = 65536
+        hasher = hashlib.sha1()
+        hashname = 'sha1'
+        while True:
+            data = fobj.read(bufsize)
+            if not data:
+                break
+            hasher.update(data)
+        return hashname + ':' + hasher.hexdigest()
+
+    def uninstall(self):
+        """Plan to uninstall all known, unmodified files, and empty dirs."""
+
+        # normalize blacklist so we can check it fast
+        blacklist_keys = {self.sim.normpath(k) for k in self.BLACKLIST}
+
+        # go in reverse length order, to remove leaves before dirs
+        keys = list(self.meta['files'].keys())
+        keys.sort(key=len, reverse=True)
+        for k in keys:
+            if k in blacklist_keys:
+                continue
+            v = self.meta['files'][k]
+            if v == self.M_HASH_DIR:
+                # remove if exists and empty
+                if self.sim.isdir(k) and not self.sim.listdir(k):
+                    self.sim.rmdir(k)
+            elif self.sim.isfile(k) and k in self.unmodified:
+                # exists and not modified, so remove it
+                self.sim.remove_file(k)
+
+    def install_tree(self, src, dst):
+        """Plan to install a tree."""
+        self.sim.install_tree(src, dst)
+
+    def sim_label(self, k, v):
+        """Generate a label for this operation in the summary."""
+        if v is None:
+            if os.path.isdir(os.path.join(self.root, k)):
+                return '  [!] rmdir    '
+            else:
+                return '  [!] delete   '
+        elif v[0] == self.sim.M_FILE:
+            if os.path.isfile(os.path.join(self.root, k)) and k not in self.unmodified:
+                # it exists and it's either unknown or modified
+                return ' [!!] overwrite'
+            else:
+                return '      install  '
+        elif v[0] == self.sim.M_DIR:
+            return '      mkdir    '
+        else:
+            raise RuntimeError('unhandled change')
+
+    def summarize(self):
+        """Summarize planned changes."""
+        if self.sim.changes:
+            print('In {}'.format(self.root))
+            for k, v in self.sim.changes.items():
+                print(self.sim_label(k, v), k)
+            return True
+        return False
+
+    def commit(self):
+        """Execute planned changes, printing step by step."""
+        with open(self.metapath, 'a+') as metafile:
+            metafile.seek(0)
+            try:
+                data = json.load(metafile)
+            except Exception:
+                data = self.default_meta()
+            if data != self.meta:
+                die('metafile has changed, rerun tool')
+            metafile.seek(0)
+            metafile.truncate(0)
+            json.dump(self.meta, metafile, indent=2)
+            metafile.flush()
+            metafile.seek(0)
+
+            print('In {}'.format(self.root))
+
+            for k, v in self.sim.changes.items():
+                print(self.sim_label(k, v), k)
+                fullk = os.path.join(self.root, k)
+                if v is None:
+                    if os.path.isdir(fullk):
+                        os.rmdir(fullk)
+                    elif os.path.isfile(fullk):
+                        os.remove(fullk)
+                    if k in self.meta['files']:
+                        del self.meta['files'][k]
+                elif v[0] == self.sim.M_FILE:
+                    shutil.copy2(v[1], fullk)
+                    with open(fullk, 'rb') as f:
+                        self.meta['files'][k] = self.hash(f)
+                elif v[0] == self.sim.M_DIR:
+                    os.mkdir(fullk)
+                    self.meta['files'][k] = self.M_HASH_DIR
+
+                metafile.truncate(0)
+                json.dump(self.meta, metafile, indent=2)
+                metafile.flush()
+                metafile.seek(0)
+
+        self.sim.reset()
+
+        if not self.meta['files']:
+            os.remove(self.metapath)
 
 def main(paths, dry_run, uninstall, optional_mods):
     paths.discover()
     print()
-    uninstall_did_something = do_install(paths, True, uninstall, optional_mods)
-    if uninstall and not uninstall_did_something:
+
+    gameins = Installer(paths.game)
+    appins = Installer(paths.appdata)
+
+    gameins.uninstall()
+    appins.uninstall()
+
+    if not uninstall:
+        gameins.install_tree('Data', 'Data')
+        if optional_mods:
+            gameins.install_tree('OPTIONAL-MODS/bin', 'bin')
+
+        appins.install_tree('Baldur\'s Gate 3', '')
+
+    if len(gameins.sim.changes) + len(appins.sim.changes) == 0:
         print('Nothing to do.')
         sys.exit(0)
+
+    gameins.summarize()
+    print()
+    appins.summarize()
 
     if not dry_run:
         print()
@@ -494,7 +650,9 @@ def main(paths, dry_run, uninstall, optional_mods):
             print('exiting...')
             sys.exit(0)
         print()
-        do_install(paths, False, uninstall, optional_mods)
+        gameins.commit()
+        print()
+        appins.commit()
         print()
         print('Done.')
 
