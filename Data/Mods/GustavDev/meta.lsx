@@ -15,7 +15,7 @@
                         </node>
                         <node id="ModuleShortDesc">
                             <attribute id="Folder" type="LSString" value="Gustav"/>
-                            <attribute id="MD5" type="LSString" value="cb9a7d73d4e72e2107eee6a4f24dce34"/>
+                            <attribute id="MD5" type="LSString" value="4c320990b9af069797c273c8df676332"/>
                             <attribute id="Name" type="LSString" value="Gustav"/>
                             <attribute id="UUID" type="FixedString" value="991c9c7a-fb80-40cb-8f0d-b92d4e80e9b1"/>
                             <attribute id="Version64" type="int64" value="36029301681017806"/>
@@ -28,7 +28,7 @@
                     <attribute id="Description" type="LSString" value=""/>
                     <attribute id="Folder" type="LSString" value="GustavDev"/>
                     <attribute id="LobbyLevelName" type="FixedString" value=""/>
-                    <attribute id="MD5" type="LSString" value="6e85f2d2ed7fed78b3a7892b843dcdfc"/>
+                    <attribute id="MD5" type="LSString" value="8599e90db9e1c54a4d301fcd4da0fcd3"/>
                     <attribute id="MainMenuBackgroundVideo" type="FixedString" value=""/>
                     <attribute id="MenuLevelName" type="FixedString" value="SYS_Menuscreen_Act3_B"/>
                     <attribute id="Name" type="LSString" value="GustavDev"/>
@@ -38,7 +38,7 @@
                     <attribute id="Tags" type="LSString" value=""/>
                     <attribute id="Type" type="FixedString" value="Adventure"/>
                     <attribute id="UUID" type="FixedString" value="28ac9ce2-2aba-8cda-b3b5-6e922f71b6b8"/>
-                    <attribute id="Version64" type="int64" value="144959827759161474"/>
+                    <attribute id="Version64" type="int64" value="144960257255917656"/>
                     <children>
                         <node id="PublishVersion">
                             <attribute id="Version64" type="int64" value="144255927711717104"/>
