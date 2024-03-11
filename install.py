@@ -11,6 +11,16 @@ import os.path
 import shutil
 import sys
 
+# directories that should be copied over to the main game files
+# (also applies to OPTIONAL-MODS)
+MOD_DIRS = ['Data', 'bin']
+
+# blacklisted files, you can overwrite them but deleting them is no-no
+BLACKLIST = [
+    'bin/bink2w64.dll',
+    'bin/bink2w64_original.dll',
+]
+
 def die(*args):
     print('ERROR:', *args, file=sys.stderr)
     sys.exit(1)
@@ -454,12 +464,6 @@ class Installer:
     M_VERSION = 0
     M_HASH_DIR = 'dir' # the special hash for dirs
 
-    # blacklisted files, you can overwrite them but deleting them is no-no
-    BLACKLIST = [
-        'bin/bink2w64.dll',
-        'bin/bink2w64_original.dll',
-    ]
-
     def __init__(self, root, metafile='overviewer-bg3-mods.meta'):
         self.root = os.path.abspath(root)
         self.sim = InstallSimulator(self.root)
@@ -523,7 +527,7 @@ class Installer:
         """Plan to uninstall all known, unmodified files, and empty dirs."""
 
         # normalize blacklist so we can check it fast
-        blacklist_keys = {self.sim.normpath(k) for k in self.BLACKLIST}
+        blacklist_keys = {self.sim.normpath(k) for k in BLACKLIST}
 
         # go in reverse length order, to remove leaves before dirs
         keys = list(self.meta['files'].keys())
@@ -628,9 +632,14 @@ def main(paths, dry_run, uninstall, optional_mods):
     appins.uninstall()
 
     if not uninstall:
-        gameins.install_tree('Data', 'Data')
+        for d in MOD_DIRS:
+            if os.path.isdir(d):
+                gameins.install_tree(d, d)
         if optional_mods:
-            gameins.install_tree('OPTIONAL-MODS/bin', 'bin')
+            for d in MOD_DIRS:
+                optional_dir = os.path.join('OPTIONAL-MODS', d)
+                if os.path.isdir(optional_dir):
+                    gameins.install_tree(optional_dir, d)
 
         appins.install_tree('Baldur\'s Gate 3', '')
 
