@@ -1,13 +1,13 @@
 # Mods
   - Tuna Custom Bard Songs
   - OWTravelersSong (1.2.0): https://github.com/aheadley/OWTravelersSong
-  - ModFixer (1.1): https://www.nexusmods.com/baldursgate3/mods/141
-  - PartyLimitBegone (legacy-1.8.5): https://www.nexusmods.com/baldursgate3/mods/327
+  - bg3se (2023/10/28): https://github.com/Norbyte/bg3se
+  - Aether's No Party Limits (1.01): https://www.nexusmods.com/baldursgate3/mods/3479
   - AnimateDead++ (1.37.33): https://www.nexusmods.com/baldursgate3/mods/642
   - PlayWithMe (1.0.1): https://www.nexusmods.com/baldursgate3/mods/2759
-  - EnhancedLeap AoE NoCombat (1.0.0): https://www.nexusmods.com/baldursgate3/mods/653
 
 # Installation
+  - copy & paste the contents of `bin/` into `%steamapps%/common/Baldurs Gate 3/bin/`
   - copy & paste the contents of `Data/` into `%steamapps%/common/Baldurs Gate 3/Data/`
   - copy & paste the contents of `Baldur's Gate 3/` into `%localappdata%/Larian Studios/Baldur's Gate 3/`
 
