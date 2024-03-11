@@ -7,6 +7,11 @@
   - PlayWithMe (1.0.1): https://www.nexusmods.com/baldursgate3/mods/2759
 
 # Installation
+
+### Linux Only
+  - add `WINEDLLOVERRIDES="DWrite.dll=n,b"` to the game launch options
+
+### All Platforms
   - copy & paste the contents of `bin/` into `%steamapps%/common/Baldurs Gate 3/bin/`
   - copy & paste the contents of `Data/` into `%steamapps%/common/Baldurs Gate 3/Data/`
   - copy & paste the contents of `Baldur's Gate 3/` into `%localappdata%/Larian Studios/Baldur's Gate 3/`
