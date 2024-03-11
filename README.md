@@ -1,5 +1,5 @@
 # Mods
-  - Tuna Custom Bard Songs
+  - ~~Tuna Custom Bard Songs~~
   - OWTravelersSong (1.2.0): https://github.com/aheadley/OWTravelersSong
   - bg3se (2023/10/28): https://github.com/Norbyte/bg3se
   - Aether's No Party Limits (1.01): https://www.nexusmods.com/baldursgate3/mods/3479
