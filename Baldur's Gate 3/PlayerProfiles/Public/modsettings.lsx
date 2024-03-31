@@ -16,9 +16,6 @@
               <attribute id="UUID" value="362546ac-055c-4140-a4d0-ab3f15c0a91a" type="FixedString" />
             </node>
             <node id="Module">
-              <attribute id="UUID" value="08e267cf-bf28-4e29-8711-8282ed017fcb" type="FixedString" />
-            </node>
-            <node id="Module">
               <attribute id="UUID" value="d594f105-ef17-4456-9799-a0a9cd5b81ae" type="FixedString" />
             </node>
           </children>
@@ -27,10 +24,10 @@
           <children>
             <node id="ModuleShortDesc">
               <attribute id="Folder" value="GustavDev" type="LSString" />
-              <attribute id="MD5" value="43fd251f3f6b0a75661bc738d9cacbf5" type="LSString" />
+              <attribute id="MD5" value="c62f57aea5bd2b85748cd4396c6f2d2e" type="LSString" />
               <attribute id="Name" value="GustavDev" type="LSString" />
               <attribute id="UUID" value="28ac9ce2-2aba-8cda-b3b5-6e922f71b6b8" type="FixedString" />
-              <attribute id="Version64" value="144960686752716682" type="int64" />
+              <attribute id="Version64" value="144961116249494411" type="int64" />
             </node>
             <node id="ModuleShortDesc">
               <attribute id="Folder" value="Animate Dead++" type="LSString" />
@@ -45,13 +42,6 @@
               <attribute id="Name" value="Play With Me" type="LSString" />
               <attribute id="UUID" value="362546ac-055c-4140-a4d0-ab3f15c0a91a" type="FixedString" />
               <attribute id="Version64" value="36028797018963968" type="int64" />
-            </node>
-            <node id="ModuleShortDesc">
-              <attribute id="Folder" value="DatabaseCleaner" type="LSString" />
-              <attribute id="MD5" value="" type="LSString" />
-              <attribute id="Name" value="DatabaseCleaner" type="LSString" />
-              <attribute id="UUID" value="08e267cf-bf28-4e29-8711-8282ed017fcb" type="FixedString" />
-              <attribute id="Version64" value="36451009484029952" type="int64" />
             </node>
             <node id="ModuleShortDesc">
               <attribute id="Folder" value="AethersNoPartyLimits" type="LSString" />
