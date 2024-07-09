@@ -1,9 +1,9 @@
 # Mods
   - ~~Tuna Custom Bard Songs~~
   - OWTravelersSong (1.2.0): https://github.com/aheadley/OWTravelersSong
-  - bg3se (2023/10/28): https://github.com/Norbyte/bg3se
+  - bg3se (20240430): https://github.com/Norbyte/bg3se
   - Aether's No Party Limits (1.01): https://www.nexusmods.com/baldursgate3/mods/3479
-  - AnimateDead++ (1.37.33): https://www.nexusmods.com/baldursgate3/mods/642
+  - AnimateDead++ (1.38.03): https://www.nexusmods.com/baldursgate3/mods/642
   - PlayWithMe (1.0.1): https://www.nexusmods.com/baldursgate3/mods/2759
 
 # Installation
